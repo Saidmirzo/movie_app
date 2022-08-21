@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:move_app/pages_screen/now_playing_page.dart';
-import 'package:move_app/pages_screen/popular_page.dart';
-import 'package:move_app/pages_screen/upcomming_page.dart';
-import 'package:provider/provider.dart';
-
-import '../domain/providers/main_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:move_app/domain/blocs/main_bloc/main_bloc.dart';
+import 'package:move_app/domain/blocs/now_playing/now_playing_bloc.dart';
+import 'package:move_app/domain/blocs/poular_bloc/bloc/popular_bloc.dart';
+import 'package:move_app/domain/blocs/upcomming_bloc/bloc/upcomming_bloc.dart';
 import '../domain/utils/const.dart';
 
 class MainPage extends StatefulWidget {
@@ -18,6 +15,15 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   TextEditingController controller = TextEditingController();
+  PageController controllerPage = PageController();
+   bool connected=false;
+  checkInterne()async{
+  }
+  @override
+  void initState() {
+    super.initState();
+    checkInterne();
+  }
   @override
   void dispose() {
     controller.dispose();
@@ -26,70 +32,108 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MainProvider>(builder: (context, provider, child) {
-      return Scaffold(
+    return BlocBuilder<MainBloc, MainState>(
+      builder: (context, state) {
+        sendSortFunctions(String type) {
+          switch (state.indexPage) {
+            case 0:
+              context.read<NowPlayingBloc>().add(NowPlayingEventSortList(type));
+              break;
+            case 1:
+              context.read<UpcommingBloc>().add(UpcommingEventSortList(type));
+              break;
+            case 2:
+              context.read<PopularBloc>().add(PopularEventSortList(type));
+              break;
+            default:
+          }
+        }
+
+        sendSearchFunctions(String text) {
+          switch (state.indexPage) {
+            case 0:
+              context.read<NowPlayingBloc>().add(NowPlayingEventSearchList(text));
+              break;
+            case 1:
+              context.read<UpcommingBloc>().add(UpcommingEventSearchList(text));
+              break;
+            case 2:
+              context.read<PopularBloc>().add(PopularEventSearchList(text));
+              break;
+            default:
+          }
+        }
+
+        return Scaffold(
           appBar: AppBar(
-              title: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search',
-              hintStyle: sTextStyle(color: Colors.white, size: 18),
+            title: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search',
+                hintStyle: sTextStyle(color: Colors.white, size: 18),
+              ),
+              controller: controller,
+              onChanged: (text) {
+                sendSearchFunctions(text);
+              },
             ),
-            controller: controller,
-            onChanged: (text) {
-              provider.search(text);
-            },
-          )),
+          ),
           drawer: Drawer(
             backgroundColor: Colors.white,
-            child: Container(
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 50,
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 50,
+                ),
+                ListTile(
+                  leading: const Icon(Icons.sort_by_alpha),
+                  title: Text(
+                    'Sort by name',
+                    style: sTextStyle(color: Colors.black),
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.sort_by_alpha),
-                    title: Text(
-                      'Sort by name',
-                      style: sTextStyle(color: Colors.black),
-                    ),
-                    onTap: () {
-                      provider.sort('name');
-                    },
+                  onTap: () {
+                    sendSortFunctions('name');
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.date_range),
+                  title: Text(
+                    'Sort by date',
+                    style: sTextStyle(color: Colors.black),
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.date_range),
-                    title: Text(
-                      'Sort by date',
-                      style: sTextStyle(color: Colors.black),
-                    ),
-                    onTap: () {
-                      provider.sort('date');
-                    },
+                  onTap: () {
+                    sendSortFunctions('date');
+                    context.read<NowPlayingBloc>().add(NowPlayingEventSortList('date'));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.favorite),
+                  title: Text(
+                    'Sort by popular',
+                    style: sTextStyle(color: Colors.black),
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.favorite),
-                    title: Text(
-                      'Sort by population',
-                      style: sTextStyle(color: Colors.black),
-                    ),
-                    onTap: () {
-                      provider.sort('popular');
-                    },
-                  )
-                ],
-              ),
+                  onTap: () {
+                    sendSortFunctions('popular');
+                  },
+                )
+              ],
             ),
+          ),
+          body: PageView(
+            controller: controllerPage,
+            onPageChanged: ((index) {
+              context.read<MainBloc>().add(MainEventChangeIndexPage(index));
+            }),
+            children: pages,
           ),
           bottomNavigationBar: BottomNavigationBar(
             fixedColor: Colors.white,
             backgroundColor: Colors.blue,
-            currentIndex: provider.indexPage,
+            currentIndex: state.indexPage, //provider.indexPage,
             selectedIconTheme: const IconThemeData(color: Colors.white),
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(
-                  Icons.domain_verification_rounded,
+                  Icons.chair_rounded,
                   //color: Colors.grey,
                 ),
                 label: 'Now Playing',
@@ -107,13 +151,13 @@ class _MainPageState extends State<MainPage> {
                   ),
                   label: 'Popular'),
             ],
-            onTap: (context) {
-              provider.setIndexPage(context);
+            onTap: (index) {
+              controllerPage.animateToPage(index, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+              context.read<MainBloc>().add(MainEventChangeIndexPage(index));
             },
           ),
-          body: PageView(
-            children: const [NowPlayingPage(), ]//UpcommingPage(), PopularPage(), NowPlayingPage()],
-          ),);
-    });
+        );
+      },
+    );
   }
 }

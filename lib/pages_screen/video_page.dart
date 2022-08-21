@@ -1,53 +1,44 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:move_app/domain/models/video_model.dart';
-import 'package:move_app/domain/providers/main_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:move_app/domain/blocs/videos_bloc/bloc/videos_bloc.dart';
 import 'package:move_app/domain/utils/const.dart';
 import 'package:pod_player/pod_player.dart';
-import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class PlayVideoFromYoutube extends StatefulWidget {
-  bool isLoad = false;
-  int _id;
-  PlayVideoFromYoutube(this._id, {Key? key}) : super(key: key);
+  final int _id;
+  const PlayVideoFromYoutube(this._id, {Key? key}) : super(key: key);
 
   @override
   State<PlayVideoFromYoutube> createState() => _PlayVideoFromVimeoIdState();
 }
 
 class _PlayVideoFromVimeoIdState extends State<PlayVideoFromYoutube> {
-  getList() async {
-    await context.read<MainProvider>().getVideos(widget._id).then((value) {
-      setState(() {
-        widget.isLoad = true;
-      });
-      return value;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
-    getList();
   }
 
   @override
   void dispose() {
     super.dispose();
   }
+  //BlocProvider<VideosBloc>(create: (context)=> VideosBloc()),
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MainProvider>(builder: (context, provider, child) {
-      return widget.isLoad
-          ? Scaffold(
+    return BlocProvider(
+      create: (context) => VideosBloc()..add(VideosEventLoadInfo(widget._id)),
+      child: BlocBuilder<VideosBloc, VideosState>(
+        builder: (context, state) {
+          if (state is VideosStateLoadedInfo) {
+            return Scaffold(
               appBar: AppBar(title: const Text('Youtube player')),
               body: SafeArea(
                 child: Center(
                   child: ListView.builder(
-                      itemCount: provider.listVideo.length,
+                      itemCount: state.listVideos.length<=4?state.listVideos.length:4,
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
                           margin: const EdgeInsets.symmetric(vertical: 20),
@@ -55,24 +46,28 @@ class _PlayVideoFromVimeoIdState extends State<PlayVideoFromYoutube> {
                             children: [
                               Center(
                                 child: Text(
-                                  provider.listVideo[index].name!,
+                                  state.listVideos[index].name!,
                                   style: sTextStyle(color: Colors.black, size: 18),
                                 ),
                               ),
-                              YoutubeVideoViewer("https://www.youtube.com/watch?v=${provider.listVideo[index].key}"),
+                              YoutubeVideoViewer("https://www.youtube.com/watch?v=${state.listVideos[index].key}"),
                             ],
                           ),
                         );
                       }),
                 ),
               ),
-            )
-          : const Center(
+            );
+          } else {
+            return const Center(
               child: CircularProgressIndicator(
                 color: Colors.red,
               ),
             );
-    });
+          }
+        },
+      ),
+    );
   }
 }
 
@@ -84,7 +79,7 @@ class YoutubeVideoViewer extends StatefulWidget {
 }
 
 class _YoutubeVideoViewerState extends State<YoutubeVideoViewer> {
-  late final PodPlayerController controller;
+   late final PodPlayerController controller;
   bool isLoading = true;
   bool isErrorOnLoading = false;
   @override
@@ -107,18 +102,20 @@ class _YoutubeVideoViewerState extends State<YoutubeVideoViewer> {
   }
 
   void loadVideo() async {
+    
     try {
       final urls = await PodPlayerController.getYoutubeUrls(
         widget.videoLink,
       );
-      setState(() => isLoading = false);
       controller = PodPlayerController(
         playVideoFrom: PlayVideoFrom.networkQualityUrls(videoUrls: urls!),
         podPlayerConfig: const PodPlayerConfig(
           autoPlay: false,
           videoQualityPriority: [360],
         ),
-      )..initialise();
+      )..initialise().then((value) {
+      setState(() => isLoading = false);
+      });
     } catch (e) {
       isErrorOnLoading = true;
     }

@@ -1,13 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/widgets.dart';
-import 'package:move_app/domain/providers/main_provider.dart';
-import 'package:move_app/pages_screen/movie_about_page.dart';
-import 'package:move_app/pages_screen/video_page.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:move_app/domain/models/movie_model.dart';
+import 'package:move_app/domain/widgets/widgets.dart';
 
+import '../domain/blocs/now_playing/now_playing_bloc.dart';
 import '../domain/utils/const.dart';
 import 'movie_about_pages/movie_details_page.dart';
 
@@ -23,80 +19,81 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   @override
   void initState() {
     super.initState();
-
-    controllerScroll.addListener(() {
-      if (controllerScroll.hasClients) {
-        if (controllerScroll.position.minScrollExtent ==
-            controllerScroll.offset) {
-          context.read<MainProvider>().setIsLoad('loadNow', false);
-          context.read<MainProvider>().getNowPlayedMovies();
-        }
-      }
-    });
-    context.read<MainProvider>().getNowPlayedMovies();
+    context.read<NowPlayingBloc>().add(const NowPlayingEventLoadList());
   }
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
-    return Consumer<MainProvider>(builder: (context, provider, child) {
-      return Builder(builder: (context) {
-        if (provider.isLoad['loadNow'] ?? false) {
+    //var size = MediaQuery.of(context).size;
+    return BlocBuilder<NowPlayingBloc, NowPlayingState>(
+      builder: (context, state) {
+        if (state is NowPlayingStateLoadedNowPlayingList) {
+          List<MovieModel> listNowPlaying = state.listNowPlaying;
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 5),
             color: const Color(0xffF9F9F9),
-            child: 
-            GridView.builder(
-            controller: controllerScroll,
-            physics: const BouncingScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 200,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10),
-            itemCount: provider.listNowPlayedMovies.length,
-            itemBuilder: ( context, index) {
-              return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MovieDetailsPage(provider.listNowPlayedMovies[index],),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    height: 200,
-                    alignment: Alignment.bottomCenter,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(provider.listNowPlayedMovies[index].posterPath!=null? 'https://image.tmdb.org/t/p/w500/${provider.listNowPlayedMovies[index].posterPath}':'https://i.ibb.co/RPKnckW/ic-launcher-movies.png'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      height: 50,
-                      color: const Color.fromRGBO(0, 0, 0, 0.6),
-                      child: Center(
-                        child: Text(
-                          provider.listNowPlayedMovies[index].originalTitle!,
-                          style: sTextStyle(color: Colors.white, size: 16),
+            child: RefreshIndicator(
+              onRefresh: () async {
+                context.read<NowPlayingBloc>().add(const NowPlayingEventLoadList());
+              },
+              child: GridView.builder(
+                  controller: controllerScroll,
+                  physics: const BouncingScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 200,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemCount: listNowPlaying.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MovieDetailsPage(
+                              listNowPlaying[index],
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        height: 200,
+                        alignment: Alignment.bottomCenter,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(listNowPlaying[index].posterPath != null
+                                ? 'https://image.tmdb.org/t/p/w500/${listNowPlaying[index].posterPath}'
+                                : 'https://i.ibb.co/RPKnckW/ic-launcher-movies.png'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          height: 50,
+                          color: const Color.fromRGBO(0, 0, 0, 0.6),
+                          child: Center(
+                            child: Text(
+                              listNowPlaying[index].originalTitle!,
+                              style: sTextStyle(color: Colors.white, size: 16),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                );
-            }),
-           
+                    );
+                  }),
+            ),
           );
+        } else if (state is NowPlayingStateFailed) {
+          return   ConnectionErrorPage(0);
         } else {
           return const Center(
               child: CircularProgressIndicator(
             color: Colors.red,
           ));
         }
-      });
-    });
+      },
+    );
   }
 }

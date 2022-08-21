@@ -14,7 +14,7 @@ class MovieDetailHeader extends StatelessWidget {
 
   _buildCategoryChips(TextTheme textTheme) {
     //var genres = movies.genres;
-    return (movies.genres??[]).map((genres) {
+    return (movies.genres ?? []).map((genres) {
       return Chip(
         label: Text(genres.name!),
         labelStyle: textTheme.caption,
@@ -57,8 +57,9 @@ class MovieDetailHeader extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 240.0),
-          child: ArcBannerImage(movies.backdropPath!=null?
-              "https://image.tmdb.org/t/p/w500/${movies.backdropPath}":'https://i.ibb.co/RPKnckW/ic-launcher-movies.png'),
+          child: ArcBannerImage(movies.backdropPath != null
+              ? "https://image.tmdb.org/t/p/w500/${movies.backdropPath}"
+              : 'https://i.ibb.co/RPKnckW/ic-launcher-movies.png'),
         ),
         Positioned(
           bottom: 32.0,
@@ -68,22 +69,44 @@ class MovieDetailHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 70.0),
-                child: InkWell(
-                  onTap: (){
-                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>  PlayVideoFromYoutube(movies.id!),
+              Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 70.0),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PlayVideoFromYoutube(movies.id!),
+                          ),
+                        );
+                      },
+                      child: Poster(
+                        movies.posterPath != null
+                            ? "https://image.tmdb.org/t/p/w500/${movies.posterPath}"
+                            : 'https://i.ibb.co/RPKnckW/ic-launcher-movies.png',
+                        height: 190.0,
                       ),
-                    );
-                  },
-                  child: Poster(movies.posterPath!=null?
-                    "https://image.tmdb.org/t/p/w500/${movies.posterPath}":'https://i.ibb.co/RPKnckW/ic-launcher-movies.png',
-                    height: 190.0,
+                    ),
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 70.0),
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 35, top: 60),
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(4.0),
+                        elevation: 100.0,
+                        child: Icon(
+                          Icons.play_arrow_rounded,
+                          size: 70,
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               Expanded(
                 child: Padding(

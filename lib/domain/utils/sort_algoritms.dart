@@ -2,7 +2,7 @@ import 'package:move_app/domain/models/movie_model.dart';
 
 class SortAlgoritm {
   bool greater<T extends Comparable>(dynamic v, dynamic w) {
-    return v.compareTo(w) > 0;
+    return v.compareTo(w) < 0;
   }
 
   bool swap<T>(List<T> array, int idx, int idy) {
