@@ -46,13 +46,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         sendSortFunctions(String type) {
           switch (state.indexPage) {
             case 0:
-              context.read<NowPlayingBloc>().add(NowPlayingEventSortList(type));
+              context.read<NowPlayingBloc>().sortListNowPlaying(type);
               break;
             case 1:
-              context.read<UpcommingBloc>().add(UpcommingEventSortList(type));
+              context.read<UpcommingBloc>().sortListUpcomming(type);
               break;
             case 2:
-              context.read<PopularBloc>().add(PopularEventSortList(type));
+              context.read<PopularBloc>().sortListPopular(type);
               break;
             default:
           }
@@ -61,13 +61,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         sendSearchFunctions(String text) {
           switch (state.indexPage) {
             case 0:
-              context.read<NowPlayingBloc>().add(NowPlayingEventSearchList(text));
+              context.read<NowPlayingBloc>().search(text);
               break;
             case 1:
-              context.read<UpcommingBloc>().add(UpcommingEventSearchList(text));
+              context.read<UpcommingBloc>().search(text);
               break;
             case 2:
-              context.read<PopularBloc>().add(PopularEventSearchList(text));
+              context.read<PopularBloc>().search(text);
               break;
             default:
           }
@@ -76,12 +76,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         return Scaffold(
           appBar: AppBar(
             title: Center(
-                
-                child: Text(
-                  'Movies',
-                  style: sTextStyle(color: Colors.white, size: 22),
-                ),
-                ),
+              child: Text(
+                'Movies',
+                style: sTextStyle(color: Colors.white, size: 22),
+              ),
+            ),
             actions: [
               Container(
                 width: 220,
@@ -163,7 +162,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   ),
                   onTap: () {
                     sendSortFunctions('date');
-                    context.read<NowPlayingBloc>().add(NowPlayingEventSortList('date'));
                   },
                 ),
                 ListTile(
@@ -182,7 +180,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           body: PageView(
             controller: controllerPage,
             onPageChanged: ((index) {
-              context.read<MainBloc>().add(MainEventChangeIndexPage(index));
+              context.read<MainBloc>().changeIndexPage(index);
             }),
             children: pages,
           ),
@@ -214,7 +212,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             ],
             onTap: (index) {
               controllerPage.animateToPage(index, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
-              context.read<MainBloc>().add(MainEventChangeIndexPage(index));
+              context.read<MainBloc>().changeIndexPage(index);
             },
           ),
         );

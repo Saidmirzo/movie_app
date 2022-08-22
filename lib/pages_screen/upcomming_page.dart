@@ -18,7 +18,7 @@ class _UpcommingPageState extends State<UpcommingPage> {
   @override
   void initState() {
     super.initState();
-    context.read<UpcommingBloc>().add(const UpcommingEventLoadList());
+    context.read<UpcommingBloc>().loadListUpcomming();
   }
 
   @override
@@ -33,7 +33,7 @@ class _UpcommingPageState extends State<UpcommingPage> {
             color: const Color(0xffF9F9F9),
             child: RefreshIndicator(
               onRefresh: () async {
-                context.read<UpcommingBloc>().add(const UpcommingEventLoadList());
+                context.read<UpcommingBloc>().loadListUpcomming();
               },
               child: GridView.count(
                 physics: const BouncingScrollPhysics(),

@@ -19,7 +19,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   @override
   void initState() {
     super.initState();
-    context.read<NowPlayingBloc>().add(const NowPlayingEventLoadList());
+    context.read<NowPlayingBloc>().loadListNowPlaying();
   }
 
   @override
@@ -34,7 +34,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
             color: const Color(0xffF9F9F9),
             child: RefreshIndicator(
               onRefresh: () async {
-                context.read<NowPlayingBloc>().add(const NowPlayingEventLoadList());
+                context.read<NowPlayingBloc>().loadListNowPlaying();
               },
               child: GridView.builder(
                   controller: controllerScroll,
@@ -86,7 +86,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
             ),
           );
         } else if (state is NowPlayingStateFailed) {
-          return   ConnectionErrorPage(0);
+          return ConnectionErrorPage(0);
         } else {
           return const Center(
               child: CircularProgressIndicator(

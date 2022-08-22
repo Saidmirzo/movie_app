@@ -23,7 +23,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
   @override
   void initState() {
     super.initState();
-    context.read<MovieAboutBloc>().add(MovieAboutEventLoad(widget.model.id!));
+    context.read<MovieAboutBloc>().loadMovieAbout(widget.model.id!);
   }
 
   @override

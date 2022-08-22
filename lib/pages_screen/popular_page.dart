@@ -17,7 +17,7 @@ class _PopularPageState extends State<PopularPage> {
   @override
   void initState() {
     super.initState();
-    context.read<PopularBloc>().add(PopularEventLoadList());
+    context.read<PopularBloc>().loadPopularList();
   }
 
   @override
@@ -32,7 +32,7 @@ class _PopularPageState extends State<PopularPage> {
               color: const Color(0xffF9F9F9),
               child: RefreshIndicator(
                 onRefresh: () async {
-                  context.read<PopularBloc>().add(PopularEventLoadList());
+                  context.read<PopularBloc>().loadPopularList();
                 },
                 child: GridView.count(
                   physics: const BouncingScrollPhysics(),

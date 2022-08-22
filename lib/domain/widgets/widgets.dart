@@ -59,13 +59,13 @@ class ConnectionErrorPage extends StatelessWidget {
               onTap: () {
                 switch (indexPage) {
                   case 0:
-                    context.read<NowPlayingBloc>().add(const NowPlayingEventLoadList());
+                    context.read<NowPlayingBloc>().loadListNowPlaying();
                     break;
                   case 1:
-                    context.read<UpcommingBloc>().add(const UpcommingEventLoadList());
+                    context.read<UpcommingBloc>().loadListUpcomming();
                     break;
                   case 2:
-                    context.read<PopularBloc>().add(PopularEventLoadList());
+                    context.read<PopularBloc>().loadPopularList();
                     break;
                   default:
                 }
