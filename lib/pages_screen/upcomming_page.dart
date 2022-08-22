@@ -82,7 +82,7 @@ class _UpcommingPageState extends State<UpcommingPage> {
               ),
             ),
           );
-        } else if (state is PopularStateFailed) {
+        } else if (state is UpcommingStateFailed) {
           return ConnectionErrorPage(1);
         } else {
           return const Center(

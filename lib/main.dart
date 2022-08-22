@@ -3,9 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_app/domain/blocs/movie_about_bloc/bloc/movie_about_bloc.dart';
 import 'package:move_app/domain/blocs/poular_bloc/bloc/popular_bloc.dart';
 import 'package:move_app/domain/blocs/upcomming_bloc/bloc/upcomming_bloc.dart';
-import 'package:move_app/domain/blocs/videos_bloc/bloc/videos_bloc.dart';
-import 'package:move_app/pages_screen/main_page.dart';
-
+import 'package:move_app/pages_screen/first_anim_page.dart';
 import 'domain/blocs/main_bloc/main_bloc.dart';
 import 'domain/blocs/now_playing/now_playing_bloc.dart';
 
@@ -30,7 +28,7 @@ class MyApp extends StatelessWidget {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: MainPage(),
+        home: SplashScreenPage(),
       ),
     );
   }

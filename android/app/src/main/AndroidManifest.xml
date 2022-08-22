@@ -2,7 +2,7 @@
     package="com.example.move_app">
 <uses-permission android:name="android.permission.INTERNET" />
    <application
-        android:label="move_app"
+        android:label="Movies"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

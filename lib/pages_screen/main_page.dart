@@ -13,20 +13,29 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   TextEditingController controller = TextEditingController();
   PageController controllerPage = PageController();
-   bool connected=false;
-  checkInterne()async{
-  }
+
+  late Animation<double> animation;
+  late AnimationController animController;
+  bool isForward = false;
+
   @override
   void initState() {
     super.initState();
-    checkInterne();
+    animController = AnimationController(vsync: this, duration: Duration(milliseconds: 1000));
+    final curventAnim = CurvedAnimation(parent: animController, curve: Curves.easeOutExpo);
+    animation = Tween<double>(begin: 0, end: 150).animate(curventAnim)
+      ..addListener(() {
+        setState(() {});
+      });
   }
+
   @override
   void dispose() {
     controller.dispose();
+    animController.dispose();
     super.dispose();
   }
 
@@ -66,16 +75,68 @@ class _MainPageState extends State<MainPage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search',
-                hintStyle: sTextStyle(color: Colors.white, size: 18),
+            title: Center(
+                
+                child: Text(
+                  'Movies',
+                  style: sTextStyle(color: Colors.white, size: 22),
+                ),
+                ),
+            actions: [
+              Container(
+                width: 220,
+                height: 50,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      width: animation.value,
+                      decoration: const BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(50),
+                          topLeft: Radius.circular(50),
+                        ),
+                      ),
+                      child: TextField(
+                        style: sTextStyle(color: Colors.white, size: 18),
+                        decoration: InputDecoration(
+                          hintText: 'Search',
+                          hintStyle: sTextStyle(color: Colors.white, size: 18),
+                        ),
+                        controller: controller,
+                        onChanged: (text) {
+                          sendSearchFunctions(text);
+                        },
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: animation.value > 1 ? Colors.black : Colors.transparent,
+                        borderRadius: animation.value > 1
+                            ? const BorderRadius.only(
+                                bottomRight: Radius.circular(50),
+                                topRight: Radius.circular(50),
+                              )
+                            : BorderRadius.circular(50),
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          if (isForward) {
+                            animController.reverse();
+                            isForward = !isForward;
+                          } else {
+                            animController.forward();
+                            isForward = !isForward;
+                          }
+                        },
+                        icon: const Icon(Icons.search),
+                      ),
+                    )
+                  ],
+                ),
               ),
-              controller: controller,
-              onChanged: (text) {
-                sendSearchFunctions(text);
-              },
-            ),
+            ],
           ),
           drawer: Drawer(
             backgroundColor: Colors.white,
